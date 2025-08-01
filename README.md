@@ -34,7 +34,7 @@
 
 ### 🖼️ Home Page
 
-![Home Page](./assets/web.png)
+![Home Page](/src/assets/web.png)
 
 ---
 
