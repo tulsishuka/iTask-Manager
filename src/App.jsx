@@ -68,7 +68,9 @@ const App = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newTask)
             })
-            setform({ task: "", user: "" })
+            // setform({ task: "", user: "" })
+            setform({ task: "", user: "", id: "" });
+
         } else {
             toast.error("Please enter at least 4 characters in both fields.")
         }
