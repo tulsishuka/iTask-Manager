@@ -28,10 +28,6 @@
 
 ---
 
-## 📸 Screenshots
-
-## 📸 Screenshots
-
 ### 🖼️ Home Page
 
 ![Home Page](/src/assets/web.png)
