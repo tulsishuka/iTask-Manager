@@ -7,6 +7,10 @@ import { FaCopy } from "react-icons/fa";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 
+// const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 const App = () => {
     const [form, setform] = useState({ task: "", user: "" })
     const [passwordArray, setPasswordArray] = useState([])
@@ -24,7 +28,7 @@ const App = () => {
     const copyText = async (text) => {
         try {
             await navigator.clipboard.writeText(text)
-            toast.success('Copied to clipboard!', {
+            toast.success('Copied the item!', {
                 position: "top-right",
                 autoClose: 2000,
                 theme: "dark"
@@ -39,11 +43,12 @@ const App = () => {
         }
     }
 
-    const getData = async () => {
-        let req = await fetch("http://localhost:3000/")
-        let data = await req.json()
-        setPasswordArray(data)
-    }
+  
+const getData = async () => {
+    let req = await fetch(API_URL)
+    let data = await req.json()
+    setPasswordArray(data)
+}
 
     useEffect(() => {
         getData()
@@ -51,11 +56,13 @@ const App = () => {
 
     const deleteBtn = async (id) => {
         setPasswordArray(passwordArray.filter(item => item.id !== id))
-        await fetch("http://localhost:3000/", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
-        })
+     
+    await fetch(API_URL, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id })
+})
+    
     }
 
     const saveData = async (e) => {
@@ -63,12 +70,14 @@ const App = () => {
         if (form.task.length > 3 && form.user.length > 3) {
             const newTask = { ...form, id: uuidv4(), isCompleted: false };
             setPasswordArray([...passwordArray, newTask])
-            await fetch("http://localhost:3000/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newTask)
-            })
-            // setform({ task: "", user: "" })
+          
+        await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newTask)
+}
+
+        )
             setform({ task: "", user: "", id: "" });
 
         } else {

@@ -1,48 +1,83 @@
 
 
-const express = require('express')
-const bodyparser = require('body-parser')
-const cors = require('cors')
-const { MongoClient } = require('mongodb');
 
-const url = 'mongodb://localhost:27017';
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Get env values
+// eslint-disable-next-line no-undef
+const PORT = process.env.PORT || 3000;
+// eslint-disable-next-line no-undef
+const url = process.env.MONGO_URL;
+// eslint-disable-next-line no-undef
+const dbName = process.env.DB_NAME;
+
+if (!url) {
+  throw new Error("MONGO_URL is undefined. Check your .env file!");
+}
+
 const client = new MongoClient(url);
-client.connect(); 
 
-const dbName = 'todolist';
-const PORT = 3000;
-const app = express()
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
-app.use(bodyparser.json())
-app.use(cors())
+// Connect to MongoDB
+async function connectDB() {
+  try {
+    await client.connect();
+    console.log("Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+    // eslint-disable-next-line no-undef
+    process.exit(1); // Stop server if connection fails
+  }
+}
+await connectDB();
 
-app.get('/', async(req, res) => {
-     const db = client.db(dbName);
-       const collection =db.collection("task")
-           const findResult = await collection.find({}).toArray();
-   res.json(findResult)
-
+// GET all tasks
+app.get('/', async (req, res) => {
+  try {
+    const db = client.db(dbName);
+    const collection = db.collection('task');
+    const tasks = await collection.find({}).toArray();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
+  }
 });
 
+// POST a new task
+app.post('/', async (req, res) => {
+  try {
+    const db = client.db(dbName);
+    const collection = db.collection('task');
+    const result = await collection.insertOne(req.body);
+    res.send({ success: true, result });
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
+  }
+});
 
-app.post('/',async(req,res)=>{
- const form = req.body;
-   const db = client.db(dbName);
-     const collection =db.collection("task")
-      const findResult = await collection.insertOne(form);
-    res.send({success: true, result: findResult})
-})
+// DELETE a task
+app.delete('/', async (req, res) => {
+  try {
+    const db = client.db(dbName);
+    const collection = db.collection('task');
+    const result = await collection.deleteOne(req.body);
+    res.send({ success: true, result });
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
+  }
+});
 
-app.delete('/',async(req,res)=>{
- const form = req.body;
-   const db = client.db(dbName);
-     const collection =db.collection("task")
-      const findResult = await collection.deleteOne(form);
-    res.send({success: true, result: findResult})
-})
-
-
-
-app.listen(PORT,()=>{
-    console.log("server running")
-})
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
